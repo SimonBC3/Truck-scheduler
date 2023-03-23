@@ -1,0 +1,14 @@
+En este dominio tenemos camiones, conductores y paquetes que tienen que ser
+transportados de una ciudad a otra. Inicialmente los objetos están localizados en una
+ciudad particular y el objetivo es transportar todos los paquetes a sus ciudades
+destino, así como dejar los camiones y los conductores en una determinada ciudad.
+
+Los objetos se cargan en los camiones para ser transportados de una ciudad a otra.
+No existe límite en la capacidad de los camiones (aunque puede realizarse una
+ampliación para considerar capacidades máximas). Un camión necesita un conductor
+para poder moverse. Además, los conductores pueden desplazarse de una ciudad a
+otra caminando o mediante autobús público, que tiene un coste asociado a definir
+por cada alumno/a. Se establece una red de caminos por donde los conductores
+pueden caminar (y moverse los autobuses) y una red de carreteras por donde se
+pueden conducir los camiones.
+
