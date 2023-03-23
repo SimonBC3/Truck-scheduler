@@ -21,22 +21,22 @@ def select_new_city(state, x, y):  # evaluation function
     return best_city
 
 
-def travel_op(state, car, y):  # we receive the car as parameter
-    x = state.cars[car]['location']
+def travel_op(state, truck, y):  # we receive the car as parameter
+    x = state.trucks[truck]['location']
     d = distance(state.coordinates[x], state.coordinates[y])
-    if state.location == 'in_car' and y in state.connection[x] and state.cars[car]['fuel'] >= d:
-        state.cars[car]['location'] = y
+    if state.location == 'in_car' and y in state.connection[x] and state.cars[truck]['fuel'] >= d:
+        state.trucks[truck]['location'] = y
         state.path.append(y)
         state.cost += d
-        state.cars[car]['fuel'] -= d
+        state.trucks[truck]['fuel'] -= d
         return state
     else:
         return False
 
 
-def load_car_op(state, car):
-    if state.location == state.cars[car]['location']:
-        state.location = 'in_car'
+def load_car_op(state, truck):
+    if state.location == state.cars[truck]['location']:
+        state.location = 'in_truck'
         return state
     else:
         return False
@@ -115,8 +115,8 @@ state1.roads = {'Huelva': {'Sevilla'}, 'Sevilla': {'Cadiz', 'Huelva', 'Cordoba',
 
 state1.paths = {}
 
-state1.buses = {'b0': {'location': 'Huelva', 'price': 3}, 'b1': {'location': 'Huelva', 'price': 3},
-               'b2': {'location': 'Huelva'}, 'price': 3}
+state1.buses = {'b0': {'location': 'Huelva', 'price': 3}, 'b1': {'location': 'Sevilla', 'price': 3},
+               'b2': {'location': 'Almeria'}, 'price': 3}
 state1.location = 'Huelva'
 # state1.location_car = 'Huelva'
 state1.trucks = {'t0': {'location': 'Huelva'}, 't1': {'location': 'Huelva'},
