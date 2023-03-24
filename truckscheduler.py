@@ -12,7 +12,7 @@ def distance(c1, c2):
 def select_new_city(state, x, y):  # evaluation function
     best = inf  # big float
     for c in state.roads.keys():
-        if c not in state.path and c in state.connection[x]:
+        if c not in state.path and c in state.roads[x]:
             currentCost = state.cost + \
                 distance(state.coordinates[c], state.coordinates[y])
             if currentCost < best:
@@ -21,44 +21,54 @@ def select_new_city(state, x, y):  # evaluation function
     return best_city
 
 
-def travel_op(state, truck, y):
-    x = state.trucks[truck]['location']
-    d = distance(state.coordinates[x], state.coordinates[y])
-    if state.location == 'in_car' and y in state.connection[x]:
-        state.trucks[truck]['location'] = y
-        state.path.append(y)
-        state.cost += d
+def travel_op(state, truck, driver, selectedCity):
+    currentTruckLocation = state.trucks[truck]['location']
+    if state.drivers[driver]['location'] == 'in_truck' and selectedCity in state.roads[currentTruckLocation]:
+        state.trucks[truck]['location'] = selectedCity
+        state.path.append(selectedCity)
+        state.cost += distance(state.coordinates[currentTruckLocation], state.coordinates[selectedCity])
         return state
     else:
         return False
 
 
 def load_truck_op(state, driver, truck):
-    if state[driver]['location'] == truck['location']:
-        state[driver]['location'] = 'in_truck'
+    if state.drivers[driver]['location'] == state.trucks[truck]['location']:
+        state.drivers[driver]['location'] = 'in_truck'
         return state
     return False
 
 
-pyhop.declare_operators(travel_op, load_truck_op, unload_car_op)
+def unload_truck_op(state, driver, truck, goal):
+    print('UNLOADED---------------------------------------  ')
+    if goal.drivers[driver]['location'] == state.trucks[truck]['location'] and state.drivers[driver]['location'] == 'in_truck':
+        state.drivers[driver]['location'] = state.trucks[truck]['location']
+        return state
+    else:
+        return False
+
+
+pyhop.declare_operators(travel_op, load_truck_op, unload_truck_op)
 print()
 pyhop.print_operators()
 
 
-def travel_m(state, goal, truck):
+def travel_m(state, goal, truck, driver):
     truckCurrentLocation = state.trucks[truck]['location']
     truckGoalLocation = goal.trucks[truck]['location']
     if truckCurrentLocation != truckGoalLocation:
-        selectedCity = select_new_city(state, truckCurrentLocation, truckGoalLocation)
-        #dunno if necesary
-        g = pyhop.Goal('g')
-        g.final = truckGoalLocation
-        return [('travel_op', truck, selectedCity), ('travel_to_city', g, truck)]
+        selectedCity = select_new_city(
+            state, truckCurrentLocation, truckGoalLocation)
+        return [('travel_op', truck, driver, selectedCity), ('travel_to_city', goal, truck, driver)]
     return False
 
 
-def already_there(state, goal, truck):
-    if state.trucks[truck]['location'] == goal.trucks[truck]['location']:
+def already_there(state, goal, truck, driver):
+    print("alreadyTHERE ----------------------------")
+    print(state.trucks[truck]['location'])
+    print(goal.trucks[truck]['location'])
+    print(state.drivers[driver]['location'])
+    if state.trucks[truck]['location'] == goal.trucks[truck]['location'] and state.drivers[driver]['location'] == 'in_truck':
         return []
     return False
 
@@ -68,12 +78,16 @@ pyhop.declare_methods('travel_to_city', travel_m, already_there)
 
 def travel_by_truck(state, goal, truck):
     for driver in state.drivers:
-        if driver['location'] != goal.drivers[d]['location']:
-            return [('load_truck_op', truck, driver), ('travel_to_city', goal, truck), ('unload_truck_op', truck)]
+        if state.drivers[driver]['location'] != goal.drivers[driver]['location']:
+            return [('load_truck_op', driver, truck), ('travel_to_city', goal, truck, driver), ('unload_truck_op', driver, truck, goal)]
     return False
 
 
-pyhop.declare_methods('travel', travel_by_truck)
+def travel_by_truck_t0(state, goal):
+    return travel_by_truck(state, goal, 't0')
+
+
+pyhop.declare_methods('travel', travel_by_truck_t0)
 print()
 pyhop.print_methods()
 
@@ -89,17 +103,17 @@ state1.roads = {'Huelva': {'Sevilla'}, 'Sevilla': {'Cadiz', 'Huelva', 'Cordoba',
                 'Jaen': {'Cordoba', 'Granada'}, 'Granada': {'Jaen', 'Malaga', 'Almeria'},
                 'Almeria': {'Granada', 'Malaga'}}
 
-state1.paths = {}
+#state1.paths = {}
 
 # state1.buses = {'b0': {'location': 'Huelva', 'price': 3}, 'b1': {'location': 'Sevilla', 'price': 3},
 #                'b2': {'location': 'Almeria'}, 'price': 3}
 
 # state1.location_car = 'Huelva'
-state1.trucks = {'t0': {'location': 'Cordoba'}}
 
 state1.packages = {'p1': {'location': 'Sevilla'}}
 
 state1.drivers = {'d1': {'location': 'Cordoba'}}
+state1.trucks = {'t0': {'location': 'Cordoba'}}
 
 state1.path = ['Cordoba']
 state1.cost = 0
@@ -107,8 +121,8 @@ state1.cost = 0
 # GOAL
 goal1 = pyhop.Goal('goal1')
 goal1.packages = {'p1': {'location': 'Jaen'}}
-goal1.drivers = {'d1': {'location': 'Cordoba'}}
-goal1.trucks = {'t0': {'location': 'Cordoba'}}
+goal1.drivers = {'d1': {'location': 'Sevilla'}}
+goal1.trucks = {'t0': {'location': 'Sevilla'}}
 
 
 # print('- If verbose=3, Pyhop also prints the intermediate states:')
