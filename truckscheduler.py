@@ -103,6 +103,12 @@ state1.roads = {'Huelva': {'Sevilla'}, 'Sevilla': {'Cadiz', 'Huelva', 'Cordoba',
                 'Jaen': {'Cordoba', 'Granada'}, 'Granada': {'Jaen', 'Malaga', 'Almeria'},
                 'Almeria': {'Granada', 'Malaga'}}
 
+state1.walkways = {'Huelva': {'Sevilla'}, 'Sevilla': {'Cadiz', 'Huelva', 'Cordoba', 'Malaga'},
+                'Cadiz': {'Sevilla', 'Malaga'}, 'Cordoba': {'Sevilla', 'Malaga', 'Jaen'},
+                'Malaga': {'Cadiz', 'Huelva', 'Cordoba', 'Sevilla', 'Granada', 'Almeria'},
+                'Jaen': {'Cordoba', 'Granada'}, 'Granada': {'Jaen', 'Malaga', 'Almeria'},
+                'Almeria': {'Granada', 'Malaga'}}
+
 #state1.paths = {}
 
 # state1.buses = {'b0': {'location': 'Huelva', 'price': 3}, 'b1': {'location': 'Sevilla', 'price': 3},
