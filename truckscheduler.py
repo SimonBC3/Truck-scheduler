@@ -8,18 +8,16 @@ def distance(c1, c2):
     y = pow(c1['Y'] - c2['Y'], 2)
     return sqrt(x + y)
 
-
-def select_new_city(state, x, y):  # evaluation function
+def select_new_city(state, currentLocation, goal):  # evaluation function
     best = inf  # big float
-    for c in state.roads.keys():
-        if c not in state.path and c in state.roads[x]:
-            currentCost = state.cost + \
-                distance(state.coordinates[c], state.coordinates[y])
+    print('------------------------- select city')
+    for connection in state.roads.keys():
+        if connection not in state.path and connection in state.roads[currentLocation]:
+            currentCost = state.cost + distance(state.coordinates[connection], state.coordinates[goal])
             if currentCost < best:
-                best_city = c
+                best_city = connection
                 best = currentCost
     return best_city
-
 
 def travel_op(state, truck, driver, selectedCity):
     currentTruckLocation = state.trucks[truck]['location']
@@ -31,8 +29,18 @@ def travel_op(state, truck, driver, selectedCity):
     else:
         return False
 
+def walk_op(state, driver, selectedCity):
+    print('------------------------- walkop')
 
-def load_truck_op(state, driver, truck):
+    currentDrivertLocation = state.drivers[driver]['location']
+    if currentDrivertLocation != 'in_truck' and selectedCity in state.walkways[currentDrivertLocation]:
+        state.drivers[driver]['location'] = selectedCity
+        state.path.append(selectedCity)
+        return state
+    return False
+
+
+def load_truck_op(state, truck, driver):
     if state.drivers[driver]['location'] == state.trucks[truck]['location']:
         state.drivers[driver]['location'] = 'in_truck'
         return state
@@ -48,7 +56,7 @@ def unload_truck_op(state, driver, truck, goal):
         return False
 
 
-pyhop.declare_operators(travel_op, load_truck_op, unload_truck_op)
+pyhop.declare_operators(travel_op, walk_op, load_truck_op, unload_truck_op)
 print()
 pyhop.print_operators()
 
@@ -62,16 +70,28 @@ def travel_m(state, goal, truck, driver):
         return [('travel_op', truck, driver, selectedCity), ('travel_to_city', goal, truck, driver)]
     return False
 
+def walk_to_truck(state, truck, driver):
+    print('-------------------------travel to truck')
+    driverCurrentLocation = state.drivers[driver]['location']
+    truckCurrentLocation = state.trucks[truck]['location']
+    if driverCurrentLocation != truckCurrentLocation:
+        print('------------------------- walkop')
+        selectedCity = select_new_city(state, driverCurrentLocation, truckCurrentLocation)
+        print('------------------------- city selected')
+        return [('walk_op', driver, selectedCity), ('travel_to_truck', truck, driver)]
+    return False
 
 def already_there(state, goal, truck, driver):
-    print("alreadyTHERE ----------------------------")
-    print(state.trucks[truck]['location'])
-    print(goal.trucks[truck]['location'])
-    print(state.drivers[driver]['location'])
     if state.trucks[truck]['location'] == goal.trucks[truck]['location'] and state.drivers[driver]['location'] == 'in_truck':
         return []
     return False
 
+def already_on_truck(state, truck, driver):
+    if state.drivers[driver]['location'] == state.trucks[truck]['location'] and state.drivers[driver]['location']:
+        return []
+    return False
+
+pyhop.declare_methods('travel_to_truck', walk_to_truck, already_on_truck)
 
 pyhop.declare_methods('travel_to_city', travel_m, already_there)
 
@@ -79,7 +99,7 @@ pyhop.declare_methods('travel_to_city', travel_m, already_there)
 def travel_by_truck(state, goal, truck):
     for driver in state.drivers:
         if state.drivers[driver]['location'] != goal.drivers[driver]['location']:
-            return [('load_truck_op', driver, truck), ('travel_to_city', goal, truck, driver), ('unload_truck_op', driver, truck, goal)]
+            return [('travel_to_truck', truck, driver),('load_truck_op', truck, driver), ('travel_to_city', goal, truck, driver), ('unload_truck_op', driver, truck, goal)]
     return False
 
 
@@ -118,10 +138,10 @@ state1.walkways = {'Huelva': {'Sevilla'}, 'Sevilla': {'Cadiz', 'Huelva', 'Cordob
 
 state1.packages = {'p1': {'location': 'Sevilla'}}
 
-state1.drivers = {'d1': {'location': 'Cordoba'}}
+state1.drivers = {'d1': {'location': 'Jaen'}}
 state1.trucks = {'t0': {'location': 'Cordoba'}}
 
-state1.path = ['Cordoba']
+state1.path = ['Jaen']
 state1.cost = 0
 
 # GOAL
