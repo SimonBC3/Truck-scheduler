@@ -11,7 +11,6 @@ def distance(c1, c2):
 
 def select_new_city(state, currentLocation, goal):  # evaluation function
     best = inf  # big float
-    print('------------------------- select city')
     for connection in state.roads.keys():
         if connection not in state.path and connection in state.roads[currentLocation]:
             currentCost = state.cost + \
@@ -22,6 +21,17 @@ def select_new_city(state, currentLocation, goal):  # evaluation function
                 best = currentCost
     return best_city
 
+def select_new_city_to_walk(state, currentLocation, goal):
+    best = inf  # big float
+    for connection in state.walkways.keys():
+        if connection not in state.walkpath and connection in state.walkways[currentLocation]:
+            currentCost = state.cost + \
+                distance(state.coordinates[connection],
+                         state.coordinates[goal])
+            if currentCost < best:
+                best_city = connection
+                best = currentCost
+    return best_city
 
 def travel_op(state, truck, driver, selectedCity):
     currentTruckLocation = state.trucks[truck]['location']
@@ -36,12 +46,10 @@ def travel_op(state, truck, driver, selectedCity):
 
 
 def walk_op(state, driver, selectedCity):
-    print('------------------------- walkop')
-
     currentDrivertLocation = state.drivers[driver]['location']
     if currentDrivertLocation != 'in_truck' and selectedCity in state.walkways[currentDrivertLocation]:
         state.drivers[driver]['location'] = selectedCity
-        state.path.append(selectedCity)
+        state.walkpath.append(selectedCity)
         return state
     return False
 
@@ -78,14 +86,11 @@ def travel_m(state, goal, truck, driver):
 
 
 def walk_to_truck(state, truck, driver):
-    print('-------------------------travel to truck')
     driverCurrentLocation = state.drivers[driver]['location']
     truckCurrentLocation = state.trucks[truck]['location']
     if driverCurrentLocation != truckCurrentLocation:
-        print('------------------------- walkop')
-        selectedCity = select_new_city(
+        selectedCity = select_new_city_to_walk(
             state, driverCurrentLocation, truckCurrentLocation)
-        print('------------------------- city selected')
         return [('walk_op', driver, selectedCity), ('travel_to_truck', truck, driver)]
     return False
 
@@ -156,7 +161,8 @@ state1.packages = {'p1': {'location': 'Sevilla'}}
 state1.drivers = {'d1': {'location': 'Jaen'}}
 state1.trucks = {'t0': {'location': 'Cordoba'}}
 
-state1.path = ['Jaen']
+state1.path = ['Cordoba']
+state1.walkpath = ['Jaen']
 state1.cost = 0
 
 # GOAL
