@@ -12,7 +12,7 @@ def distance(c1, c2):
 def select_new_city(state, currentLocation, goal):  # evaluation function
     best = inf  # big float
     for connection in state.roads.keys():
-        if connection not in state.path and connection in state.roads[currentLocation]:
+        if connection in state.roads[currentLocation]:
             currentCost = state.cost + \
                 distance(state.coordinates[connection],
                          state.coordinates[goal])
@@ -72,7 +72,7 @@ def get_off_truck_op(state, driver, truck, goal):
 
 
 def gather_package_op(state, truck, package):
-    if state.trucks[truck]['location'] == state.package[package]['location']:
+    if state.trucks[truck]['location'] == state.packages[package]['location']:
         state.packages[package]['location'] = 'in_truck'
         return state
 
@@ -83,7 +83,7 @@ def drop_package_op(state, goal, truck, package):
         return state
 
 pyhop.declare_operators(travel_op, walk_op, get_on_truck_op,
-                        get_off_truck_op, gather_package_op)
+                        get_off_truck_op, gather_package_op, drop_package_op)
 print()
 pyhop.print_operators()
 
@@ -108,7 +108,7 @@ def walk_to_truck(state, truck, driver):
     return False
 
 
-def travel_to_package(state, truck, driver, package):
+def travel_to_package_m(state, goal, truck, driver, package):
     truckCurrentLocation = state.trucks[truck]['location']
     packageLocation = state.packages[package]['location']
     if truckCurrentLocation != packageLocation:
@@ -116,7 +116,7 @@ def travel_to_package(state, truck, driver, package):
             state, truckCurrentLocation, packageLocation)
         return [('travel_op', truck, driver, selectedCity), ('travel_to_package', state, truck, driver, package)]
     else:
-        return [(gather_package_op), False]
+        return [('gather_package_op', truck, package)]
 
 
 def already_there(state, goal, truck, driver):
@@ -135,18 +135,18 @@ def all_gathered(state, goal, truck, driver):
     for package in state.packages:
         currentPackageLocation = state.packages[package]['location']
         if (currentPackageLocation != 'in_truck' and (currentPackageLocation != goal.packages[package]['location'])):
-            return [('travel_to_package', goal, truck, driver, package), ('all_gathered', state, goal, truck, driver)]
+            return [('travel_to_package', goal, truck, driver, package), ('retrieve_packages', goal, truck, driver)]
     return []
 
 
 def all_delivered(state, goal, truck, driver):
     for package in state.packages:
         if (state.packages[package]['location'] == 'in_truck'):
-            return [('deliver_package', goal, truck, driver, package), ('all_delivered', goal, truck, driver)]
+            return [('deliver_package', goal, truck, driver, package), ('finish_delivery', goal, truck, driver)]
         else:
             return []
 
-def deliver_package(state, goal, truck, driver, package):
+def deliver_package_m(state, goal, truck, driver, package):
     truckLocation = state.trucks[truck]['location']
     packageGoalLocation = goal.packages[package]['location']
     if (truckLocation != packageGoalLocation):
@@ -154,12 +154,14 @@ def deliver_package(state, goal, truck, driver, package):
             state, truckLocation, packageGoalLocation)
         return [('travel_op', truck, driver, selectedCity), ('deliver_package', goal, truck, driver, package)]
     else:
-        return [('drop_package_op', goal, truck, package), False]
+        return [('drop_package_op', goal, truck, package)]
 
 pyhop.declare_methods('travel_to_truck', walk_to_truck, already_on_truck)
 pyhop.declare_methods('retrieve_packages', all_gathered)
 pyhop.declare_methods('finish_delivery', all_delivered)
 pyhop.declare_methods('travel_to_city', travel_m, already_there)
+pyhop.declare_methods('travel_to_package', travel_to_package_m)
+pyhop.declare_methods('deliver_package', deliver_package_m)
 
 
 def travel_by_truck(state, goal, truck):
