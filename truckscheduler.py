@@ -161,12 +161,12 @@ def walk_to_truck(state, goal, truck, driver):
         selectedCity = select_new_city_sideway(
             state, driverCurrentLocation, truckCurrentLocation)
         return [('walk_op', driver, selectedCity), ('travel_to_truck_on_foot', goal, truck, driver)]
-    return [('start_delivery', goal, truck, driver)]
+    return False
 
 
 def already_on_truck(state, goal, truck, driver):
     if state.drivers[driver]['location'] == state.trucks[truck]['location'] and state.drivers[driver]['location']:
-        return []
+        return [('start_delivery', goal, truck, driver)]
     return False
 
 
