@@ -11,14 +11,23 @@ def chooseByConnection(state):
     return {}
 
 def chooseByDistance(state):
-    bestDistance, bestDriver, bestTruck = inf
+    bestDistance = 0.0
+    bestDriver = ''
+    bestTruck = ''
     for driver in state.drivers:
         for truck in state.trucks:
-            currentDistance = distance(state.drivers[driver]['location'], state.trucks[truck]['location'])
-            if currentDistance < bestDistance:
+            driverLocation = state.drivers[driver]['location']
+            truckLocation = state.trucks[truck]['location']
+            currentDistance = distance(state.coordinates[driverLocation], state.coordinates[truckLocation] )
+            if bestDistance == 0:
                 bestDistance = currentDistance
-                bestDistance = driver
+                bestDriver = driver
                 bestTruck = truck
+            else: 
+                if currentDistance < bestDistance:
+                    bestDistance = currentDistance
+                    bestDriver = driver
+                    bestTruck = truck
     return {'driver': bestDriver, 'truck': bestTruck}
 
 def distance(c1, c2):
@@ -53,6 +62,8 @@ def select_new_city_sideway(state, currentLocation, goal):
 
 def walk_op(state, driver, selectedCity):
     currentDrivertLocation = state.drivers[driver]['location']
+    if state.walkpath == []:
+        state.walkpath.append(currentDrivertLocation)
     if currentDrivertLocation != 'in_truck' and selectedCity in state.sideways[currentDrivertLocation]:
         state.drivers[driver]['location'] = selectedCity
         state.walkpath.append(selectedCity)
@@ -60,23 +71,22 @@ def walk_op(state, driver, selectedCity):
     return False
 
 def get_on_bus_op(state, driver):
-    currentBus = ''
     for bus in state.buses:
-        busLocation = state.buses[bus]['location']
-        if busLocation == state.drivers[driver]['location']:
-            state.buses[driver]['location'] = busLocation
+        if state.buses[bus]['location'] == state.drivers[driver]['location']:
+            state.buspath.append(state.drivers[driver]['location'])
+            state.drivers[driver]['location'] = 'on_bus'
             return bus
     return False
 
 def travel_by_bus_op(state, bus, selectedCity):
     currentBusLocation = state.buses[bus]['location']
     if selectedCity in state.sideways[currentBusLocation]:
-        state.buses[bus]['location']
+        state.buses[bus]['location'] = selectedCity
         state.buspath.append(selectedCity)
         return state
     return False
 
-def get_off_bus_op(state, bus, truck, driver):
+def get_off_bus_op(state, truck, driver, bus):
     currentBusLocation = state.buses[bus]['location']
     if state.drivers[driver]['location'] == 'on_bus' and currentBusLocation == state.trucks[truck]['location']:
         state.drivers[driver]['location'] = currentBusLocation
@@ -84,6 +94,8 @@ def get_off_bus_op(state, bus, truck, driver):
 
 def travel_op(state, truck, driver, selectedCity):
     currentTruckLocation = state.trucks[truck]['location']
+    if state.path == []:
+        state.path.append(currentTruckLocation)
     if state.drivers[driver]['location'] == 'in_truck' and selectedCity in state.roads[currentTruckLocation]:
         state.trucks[truck]['location'] = selectedCity
         state.path.append(selectedCity)
@@ -94,7 +106,9 @@ def travel_op(state, truck, driver, selectedCity):
         return False
 
 def get_on_truck_op(state, truck, driver):
+    print('------------------OUT ')
     if state.drivers[driver]['location'] == state.trucks[truck]['location']:
+        print('------------------IN ')
         state.drivers[driver]['location'] = 'in_truck'
         return state
     return False
@@ -133,7 +147,7 @@ def walk_to_truck(state, goal, truck, driver):
         selectedCity = select_new_city_sideway(
             state, driverCurrentLocation, truckCurrentLocation)
         return [('walk_op', driver, selectedCity), ('travel_to_truck_on_foot', goal, truck, driver)]
-    return travel_by_truck(state, goal, truck, driver)
+    return ('start_delivery', goal, truck, driver)
 
 def already_on_truck(state, goal, truck, driver):
     if state.drivers[driver]['location'] == state.trucks[truck]['location'] and state.drivers[driver]['location']:
@@ -144,16 +158,20 @@ def travel_by_bus(state, goal, truck, driver, bus):
     if bus == '':
         bus = get_on_bus_op(state, driver)
         print('---selectedbus----' + bus)
-        return [('travel_by_bus', goal, truck, driver, bus)]
+        return [('travel_to_truck_by_bus', goal, truck, driver, bus)]
     
     busLocation = state.buses[bus]['location']
     truckLocation = state.trucks[truck]['location']
 
     if busLocation != truckLocation:
         selectedCity = select_new_city_sideway(state, busLocation, truckLocation)
-        return [('travel_by_bus_op', bus, selectedCity )]
+        return [('travel_by_bus_op', bus, selectedCity ), ('travel_to_truck_by_bus', goal, truck, driver, bus)]
     else: 
-        return [('get_off_bus_op', truck, driver, bus), travel_by_truck(state, goal, truck, driver)]
+        return [('get_off_bus_op', truck, driver, bus), ('start_delivery', goal, truck, driver)]
+
+def travel_by_truck(state, goal, truck, driver):
+    return [('get_on_truck_op', truck, driver), ('retrieve_packages', goal, truck, driver),
+            ('finish_delivery', goal, truck, driver), ('travel_to_city', goal, truck, driver), ('get_off_truck_op', driver, truck, goal)]
 
 def travel_m(state, goal, truck, driver):
     truckCurrentLocation = state.trucks[truck]['location']
@@ -191,7 +209,6 @@ def all_gathered(state, goal, truck, driver):
 
 def all_delivered(state, goal, truck, driver):
     for package in state.packages:
-        print('----chechking packages-----------')
         if (state.packages[package]['location'] == 'in_truck'):
             return [('deliver_package', goal, truck, driver, package), ('finish_delivery', goal, truck, driver)]
     return []
@@ -210,16 +227,12 @@ def deliver_package_m(state, goal, truck, driver, package):
 
 pyhop.declare_methods('travel_to_truck_on_foot', walk_to_truck, already_on_truck)
 pyhop.declare_methods('travel_to_truck_by_bus', travel_by_bus)
+pyhop.declare_methods('start_delivery', travel_by_truck)
 pyhop.declare_methods('retrieve_packages', all_gathered)
 pyhop.declare_methods('travel_to_package', travel_to_package_m)
 pyhop.declare_methods('finish_delivery', all_delivered)
 pyhop.declare_methods('deliver_package', deliver_package_m)
 pyhop.declare_methods('travel_to_city', travel_m, already_there)
-
-
-def travel_by_truck(state, goal, truck, driver):
-    return [('get_on_truck_op', truck, driver), ('retrieve_packages', goal, truck, driver),
-            ('finish_delivery', goal, truck, driver), ('travel_to_city', goal, truck, driver), ('get_off_truck_op', driver, truck, goal)]
 
 def chooseVariables(state, goal):
     answer = chooseByConnection(state)
@@ -261,7 +274,6 @@ state1.sideways = {'Huelva': {'JerezDeLaFrontera'}, 'Sevilla': {'JerezDeLaFronte
                    'Alcaudete': {'Malaga', 'Osuna', 'Cordoba', 'Jaen', 'Granada'},
                    'Guadix': {'Granada', 'Jaen', 'Almeria'}}
 
-
 state1.buses = {'b0': {'location': 'Huelva', 'price': 3}, 'b1': {'location': 'Cadiz', 'price': 3},
                 'b2': {'location': 'Sevilla', 'price': 3}, 'b3': {'location': 'Cordoba', 'price': 3},
                 'b4': {'location': 'Malaga', 'price': 3}, 'b5': {'location': 'Jaen', 'price': 3},
@@ -269,11 +281,12 @@ state1.buses = {'b0': {'location': 'Huelva', 'price': 3}, 'b1': {'location': 'Ca
 
 state1.packages = {'p1': {'location': 'Sevilla'}, 'p2': {'location': 'Malaga'}, 'p3': {'location': 'Jaen'}}
 
-state1.drivers = {'d1': {'location': 'Sevilla'}, 'd2': {'location': 'Alcaudete'}}
+state1.drivers = {'d1': {'location': 'Sevilla'}, 'd2': {'location': 'Malaga'}}
 state1.trucks = {'t0': {'location': 'Almeria'}, 't1': {'location': 'Cordoba'}}
 
-state1.path = ['Cordoba']
-state1.walkpath = ['Jaen']
+state1.path = []
+state1.walkpath = []
+state1.buspath = []
 state1.cost = 0
 
 # GOAL
