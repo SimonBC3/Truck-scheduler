@@ -82,12 +82,17 @@ def walk_op(state, driver, selectedCity):
     return False
 
 
-def get_on_bus_op(state, driver):
+def get_bus(state, driver):
     for bus in state.buses:
         if state.buses[bus]['location'] == state.drivers[driver]['location']:
+            return bus
+    return False
+
+def get_on_bus_op(state, driver, bus):
+    if state.buses[bus]['location'] == state.drivers[driver]['location']:
             state.buspath.append(state.drivers[driver]['location'])
             state.drivers[driver]['location'] = 'on_bus'
-            return bus
+            return state
     return False
 
 
@@ -167,9 +172,8 @@ def already_on_truck(state, goal, truck, driver):
 
 def travel_by_bus(state, goal, truck, driver, bus):
     if bus == '':
-        bus = get_on_bus_op(state, driver)
-        print('---selectedbus----' + bus)
-        return [('travel_to_truck_by_bus', goal, truck, driver, bus)]
+        bus = get_bus(state, driver)
+        return [('get_on_bus_op', driver, bus), ('travel_to_truck_by_bus', goal, truck, driver, bus)]
 
     busLocation = state.buses[bus]['location']
     truckLocation = state.trucks[truck]['location']
@@ -239,19 +243,19 @@ def deliver_package_m(state, goal, truck, driver, package):
     else:
         return [('drop_package_op', goal, truck, package)]
 
-
-def choose_truck_and_driver(state, goal):
-    answer = choose_by_connection(state)
-    if answer != {}:
-        # walkToTruck
-        return [('travel_to_truck_on_foot', goal, answer['truck'], answer['driver'])]
-
+def driver_walks_to_truck(state, goal):
+   answer = choose_by_connection(state)
+   if answer != {}:
+       return [('travel_to_truck_on_foot', goal, answer['truck'], answer['driver'])]
+   else: 
+       return False
+   
+def driver_takes_bus_to_truck(state, goal):
     answer = choose_by_distance(state)
     if answer != {}:
         # takeBusToTruck
         return [('travel_to_truck_by_bus', goal, answer['truck'], answer['driver'], '')]
     return False
-
 
 def main(args):
 
@@ -268,7 +272,7 @@ def main(args):
     pyhop.declare_methods('finish_delivery', all_delivered)
     pyhop.declare_methods('deliver_package', deliver_package_m)
     pyhop.declare_methods('travel_to_city', travel_m, already_there)
-    pyhop.declare_methods('choose_truck_and_driver', choose_truck_and_driver)
+    pyhop.declare_methods('choose_truck_and_driver', driver_walks_to_truck, driver_takes_bus_to_truck)
 
     # Initial State
     state1 = pyhop.State('state1')
