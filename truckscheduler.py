@@ -3,14 +3,14 @@ from math import sqrt, pow, inf
 import pyhop
 
 
-def chooseByConnection(state):
+def choose_by_connection(state):
     for driver in state.drivers:
         for truck in state.trucks:
            if state.trucks[truck]['location'] in state.sideways[state.drivers[driver]['location']]:
                 return {'driver': driver, 'truck': truck}
     return {}
 
-def chooseByDistance(state):
+def choose_by_distance(state):
     bestDistance = 0.0
     bestDriver = ''
     bestTruck = ''
@@ -168,7 +168,7 @@ def travel_by_bus(state, goal, truck, driver, bus):
         return [('get_off_bus_op', truck, driver, bus), ('start_delivery', goal, truck, driver)]
 
 def travel_by_truck(state, goal, truck, driver):
-    return [('get_on_truck_op', truck, driver), ('retrieve_packages', goal, truck, driver),
+    return [('get_on_truck_op', truck, driver), ('all_gathered', goal, truck, driver),
             ('finish_delivery', goal, truck, driver), ('travel_to_city', goal, truck, driver), ('get_off_truck_op', driver, truck, goal)]
 
 def travel_m(state, goal, truck, driver):
@@ -201,7 +201,7 @@ def all_gathered(state, goal, truck, driver):
     for package in state.packages:
         currentPackageLocation = state.packages[package]['location']
         if (currentPackageLocation != 'in_truck' and (currentPackageLocation != goal.packages[package]['location'])):
-            return [('travel_to_package', goal, truck, driver, package), ('retrieve_packages', goal, truck, driver)]
+            return [('travel_to_package', goal, truck, driver, package), ('all_gathered', goal, truck, driver)]
     return []
 
 
@@ -226,27 +226,27 @@ def deliver_package_m(state, goal, truck, driver, package):
 pyhop.declare_methods('travel_to_truck_on_foot', walk_to_truck, already_on_truck)
 pyhop.declare_methods('travel_to_truck_by_bus', travel_by_bus)
 pyhop.declare_methods('start_delivery', travel_by_truck)
-pyhop.declare_methods('retrieve_packages', all_gathered)
+pyhop.declare_methods('all_gathered', all_gathered)
 pyhop.declare_methods('travel_to_package', travel_to_package_m)
 pyhop.declare_methods('finish_delivery', all_delivered)
 pyhop.declare_methods('deliver_package', deliver_package_m)
 pyhop.declare_methods('travel_to_city', travel_m, already_there)
 
 
-def chooseVariables(state, goal):
-    answer = chooseByConnection(state)
+def choose_variables(state, goal):
+    answer = choose_by_connection(state)
     if answer != {}:
         #walkToTruck
         return [('travel_to_truck_on_foot', goal, answer['truck'], answer['driver'])]
     
-    answer = chooseByDistance(state)
+    answer = choose_by_distance(state)
     if answer != {}:
         #takeBusToTruck
         return [('travel_to_truck_by_bus', goal, answer['truck'], answer['driver'], '')]
     return False
 
 
-pyhop.declare_methods('choose_variables', chooseVariables)
+pyhop.declare_methods('choose_variables', choose_variables)
 print()
 pyhop.print_methods()
 
