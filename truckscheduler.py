@@ -321,11 +321,12 @@ def main(args):
     goal1.trucks = {f't{i+1}': {'location': args.destination}
                     for i in range(0, len(args.dpos))}
 
-    pyhop.pyhop(state1, [('choose_truck_and_driver', goal1)], verbose=args.verbose)
+    pyhop.pyhop(state1, [('choose_truck_and_driver', goal1)],
+                verbose=args.verbose)
 
 
 def check_args(args):
-    if (len(args.delivery) == len(args.ppos)):
+    if (len(args.delivery) == len(args.ppos) and len(args.tpos) == len(args.dpos)):
         return True
     else:
         raise Exception(f"Check that the number of specified arguments match.")
