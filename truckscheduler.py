@@ -106,9 +106,7 @@ def travel_op(state, truck, driver, selectedCity):
         return False
 
 def get_on_truck_op(state, truck, driver):
-    print('------------------OUT ')
     if state.drivers[driver]['location'] == state.trucks[truck]['location']:
-        print('------------------IN ')
         state.drivers[driver]['location'] = 'in_truck'
         return state
     return False
@@ -234,6 +232,7 @@ pyhop.declare_methods('finish_delivery', all_delivered)
 pyhop.declare_methods('deliver_package', deliver_package_m)
 pyhop.declare_methods('travel_to_city', travel_m, already_there)
 
+
 def chooseVariables(state, goal):
     answer = chooseByConnection(state)
     if answer != {}:
@@ -247,7 +246,7 @@ def chooseVariables(state, goal):
     return False
 
 
-pyhop.declare_methods('travel', chooseVariables)
+pyhop.declare_methods('choose_variables', chooseVariables)
 print()
 pyhop.print_methods()
 
@@ -281,7 +280,7 @@ state1.buses = {'b0': {'location': 'Huelva', 'price': 3}, 'b1': {'location': 'Ca
 
 state1.packages = {'p1': {'location': 'Sevilla'}, 'p2': {'location': 'Malaga'}, 'p3': {'location': 'Jaen'}}
 
-state1.drivers = {'d1': {'location': 'Sevilla'}, 'd2': {'location': 'Alcaudete'}}
+state1.drivers = {'d1': {'location': 'Sevilla'}, 'd2': {'location': 'Guadix'}}
 state1.trucks = {'t0': {'location': 'Almeria'}, 't1': {'location': 'Cordoba'}}
 
 state1.path = []
@@ -298,4 +297,4 @@ goal1.trucks = {'t0': {'location': 'Sevilla'}, 't1': {'location': 'Sevilla'}}
 
 # print('- If verbose=3, Pyhop also prints the intermediate states:')
 
-result = pyhop.pyhop(state1, [('travel', goal1)], verbose=3)
+result = pyhop.pyhop(state1, [('choose_variables', goal1)], verbose=1)
