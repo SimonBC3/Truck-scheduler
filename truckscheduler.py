@@ -321,7 +321,7 @@ def main(args):
     goal1.trucks = {f't{i+1}': {'location': loc}
                     for i, loc in enumerate(args.destination)}
 
-    pyhop.pyhop(state1, [('choose_variables', goal1)], verbose=1)
+    pyhop.pyhop(state1, [('choose_variables', goal1)], verbose=args.verbose)
 
 
 def check_args(args):
@@ -355,6 +355,16 @@ if __name__ == "__main__":
                         choices=TRUCK_VALID_POSITIONS)
     parser.add_argument("--price", required=True,
                         help="Bus tickets' price in €. It's the same in all cities.")
+    parser.add_argument("--verbose",
+                        help="""
+                            Verbosity in the execution. if verbose = 0 (the default), pyhop returns the solution but prints nothing;
+                            - if verbose = 1, it prints the initial parameters and the answer;
+                            - if verbose = 2, it also prints a message on each recursive call;
+                            - if verbose = 3, it also prints info about what it's computing.")
+                            """,
+                        choices=[1, 2, 3],
+                        type=int,
+                        default=1)
 
     args = parser.parse_args()
     if check_args(args):
