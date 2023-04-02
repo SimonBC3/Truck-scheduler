@@ -42,8 +42,8 @@ def select_new_city(state, currentLocation, goal):  # evaluation function
 
 def select_new_city_to_walk(state, currentLocation, goal):
     best = inf  # big float
-    for connection in state.walkways.keys():
-        if connection not in state.walkpath and connection in state.walkways[currentLocation]:
+    for connection in state.sideways.keys():
+        if connection not in state.walkpath and connection in state.sideways[currentLocation]:
             currentCost = state.cost + \
                 distance(state.coordinates[connection],
                          state.coordinates[goal])
@@ -67,7 +67,7 @@ def travel_op(state, truck, driver, selectedCity):
 
 def walk_op(state, driver, selectedCity):
     currentDrivertLocation = state.drivers[driver]['location']
-    if currentDrivertLocation != 'in_truck' and selectedCity in state.walkways[currentDrivertLocation]:
+    if currentDrivertLocation != 'in_truck' and selectedCity in state.sideways[currentDrivertLocation]:
         state.drivers[driver]['location'] = selectedCity
         state.walkpath.append(selectedCity)
         return state
@@ -109,6 +109,8 @@ pyhop.print_operators()
 
 
 def travel_m(state, goal, truck, driver):
+    print("---truck---" + truck)
+    print("---driver---" + driver)
     truckCurrentLocation = state.trucks[truck]['location']
     truckGoalLocation = goal.trucks[truck]['location']
     if truckCurrentLocation != truckGoalLocation:
@@ -199,11 +201,11 @@ def travel_by_truck_t0(state, goal):
 def chooseVariables(state, goal):
     answer = chooseByConnection(state)
     if answer != {}:
-        return travel_by_truck(state, goal, answer['driver'], answer['truck'])
+        return travel_by_truck(state, goal, answer['truck'], answer['driver'],)
     
     answer = chooseByDistance(state)
     if answer != {}:
-        return travel_by_truck(state, goal, answer['driver'], answer['truck'])
+        return travel_by_truck(state, goal, answer['truck'], answer['driver'])
     return False
 
 
@@ -251,8 +253,8 @@ state1.cost = 0
 # GOAL
 goal1 = pyhop.Goal('goal1')
 goal1.packages = {'p1': {'location': 'Jaen'}}
-goal1.drivers = {'d1': {'location': 'Sevilla'}}
-goal1.trucks = {'t0': {'location': 'Sevilla'}}
+goal1.drivers = {'d1': {'location': 'Sevilla'}, 'd2': {'location': 'Sevilla'}}
+goal1.trucks = {'t0': {'location': 'Sevilla'}, 't1': {'location': 'Sevilla'}}
 
 
 # print('- If verbose=3, Pyhop also prints the intermediate states:')
