@@ -147,7 +147,7 @@ def walk_to_truck(state, goal, truck, driver):
         selectedCity = select_new_city_sideway(
             state, driverCurrentLocation, truckCurrentLocation)
         return [('walk_op', driver, selectedCity), ('travel_to_truck_on_foot', goal, truck, driver)]
-    return ('start_delivery', goal, truck, driver)
+    return [('start_delivery', goal, truck, driver)]
 
 def already_on_truck(state, goal, truck, driver):
     if state.drivers[driver]['location'] == state.trucks[truck]['location'] and state.drivers[driver]['location']:
@@ -281,7 +281,7 @@ state1.buses = {'b0': {'location': 'Huelva', 'price': 3}, 'b1': {'location': 'Ca
 
 state1.packages = {'p1': {'location': 'Sevilla'}, 'p2': {'location': 'Malaga'}, 'p3': {'location': 'Jaen'}}
 
-state1.drivers = {'d1': {'location': 'Sevilla'}, 'd2': {'location': 'Malaga'}}
+state1.drivers = {'d1': {'location': 'Sevilla'}, 'd2': {'location': 'Alcaudete'}}
 state1.trucks = {'t0': {'location': 'Almeria'}, 't1': {'location': 'Cordoba'}}
 
 state1.path = []
