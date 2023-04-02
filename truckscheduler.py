@@ -3,6 +3,24 @@ from math import sqrt, pow, inf
 import pyhop
 
 
+def chooseByConnection(state):
+    for driver in state.drivers:
+        for truck in state.trucks:
+           if state.trucks[truck]['location'] in state.sideways[state.drivers[driver]['location']]:
+                return {'driver': driver, 'truck': truck}
+    return {}
+
+def chooseByDistance(state):
+    bestDistance, bestDriver, bestTruck = inf
+    for driver in state.drivers:
+        for truck in state.trucks:
+            currentDistance = distance(state.drivers[driver]['location'], state.trucks[truck]['location'])
+            if currentDistance < bestDistance:
+                bestDistance = currentDistance
+                bestDistance = driver
+                bestTruck = truck
+    return {'driver': bestDriver, 'truck': bestTruck}
+
 def distance(c1, c2):
     x = pow(c1['X'] - c2['X'], 2)
     y = pow(c1['Y'] - c2['Y'], 2)
@@ -76,11 +94,13 @@ def gather_package_op(state, truck, package):
         state.packages[package]['location'] = 'in_truck'
         return state
 
+
 def drop_package_op(state, goal, truck, package):
     truckLocation = state.trucks[truck]['location']
     if truckLocation == goal.packages[package]['location'] and state.packages[package]['location'] == 'in_truck':
         state.packages[package]['location'] = truckLocation
         return state
+
 
 pyhop.declare_operators(travel_op, walk_op, get_on_truck_op,
                         get_off_truck_op, gather_package_op, drop_package_op)
@@ -146,6 +166,7 @@ def all_delivered(state, goal, truck, driver):
         else:
             return []
 
+
 def deliver_package_m(state, goal, truck, driver, package):
     truckLocation = state.trucks[truck]['location']
     packageGoalLocation = goal.packages[package]['location']
@@ -156,6 +177,7 @@ def deliver_package_m(state, goal, truck, driver, package):
     else:
         return [('drop_package_op', goal, truck, package)]
 
+
 pyhop.declare_methods('travel_to_truck', walk_to_truck, already_on_truck)
 pyhop.declare_methods('retrieve_packages', all_gathered)
 pyhop.declare_methods('travel_to_package', travel_to_package_m)
@@ -164,20 +186,28 @@ pyhop.declare_methods('deliver_package', deliver_package_m)
 pyhop.declare_methods('travel_to_city', travel_m, already_there)
 
 
-
-def travel_by_truck(state, goal, truck):
-    for driver in state.drivers:
-        if state.drivers[driver]['location'] != goal.drivers[driver]['location']:
-            return [('travel_to_truck', truck, driver), ('get_on_truck_op', truck, driver), ('retrieve_packages', goal, truck, driver), 
-                    ('finish_delivery', goal, truck, driver), ('travel_to_city', goal, truck, driver), ('get_off_truck_op', driver, truck, goal)]
-    return False
+def travel_by_truck(state, goal, truck, driver):
+    #GoToTruckDecision
+    return [('travel_to_truck', truck, driver), ('get_on_truck_op', truck, driver), ('retrieve_packages', goal, truck, driver),
+            ('finish_delivery', goal, truck, driver), ('travel_to_city', goal, truck, driver), ('get_off_truck_op', driver, truck, goal)]
 
 
 def travel_by_truck_t0(state, goal):
     return travel_by_truck(state, goal, 't0')
 
 
-pyhop.declare_methods('travel', travel_by_truck_t0)
+def chooseVariables(state, goal):
+    answer = chooseByConnection(state)
+    if answer != {}:
+        return travel_by_truck(state, goal, answer['driver'], answer['truck'])
+    
+    answer = chooseByDistance(state)
+    if answer != {}:
+        return travel_by_truck(state, goal, answer['driver'], answer['truck'])
+    return False
+
+
+pyhop.declare_methods('travel', chooseVariables)
 print()
 pyhop.print_methods()
 
@@ -211,8 +241,8 @@ state1.buses = {'b0': {'location': 'Huelva', 'price': 3}, 'b1': {'location': 'Se
 
 state1.packages = {'p1': {'location': 'Sevilla'}}
 
-state1.drivers = {'d1': {'location': 'Jaen'}}
-state1.trucks = {'t0': {'location': 'Cordoba'}}
+state1.drivers = {'d1': {'location': 'Sevilla'}, 'd2': {'location': 'Alcaudete'}}
+state1.trucks = {'t0': {'location': 'Almeria'}, 't1': {'location': 'Cordoba'}}
 
 state1.path = ['Cordoba']
 state1.walkpath = ['Jaen']
