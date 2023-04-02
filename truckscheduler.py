@@ -292,10 +292,10 @@ def main(args):
                        'Alcaudete': {'Malaga', 'Osuna', 'Cordoba', 'Jaen', 'Granada'},
                        'Guadix': {'Granada', 'Jaen', 'Almeria'}}
 
-    state1.buses = {'b0': {'location': 'Huelva', 'price': args.price}, 'b1': {'location': 'Cadiz', 'price': args.price},
-                    'b2': {'location': 'Sevilla', 'price': args.price}, 'b3': {'location': 'Cordoba', 'price': args.price},
-                    'b4': {'location': 'Malaga', 'price': args.price}, 'b5': {'location': 'Jaen', 'price': args.price},
-                    'b5': {'location': 'Granada', 'price': args.price}, 'b6': {'location': 'Almeria', 'price': args.price}}
+    state1.buses = {'b0': {'location': 'Huelva', 'price': 10}, 'b1': {'location': 'Cadiz', 'price': 10},
+                    'b2': {'location': 'Sevilla', 'price': 10}, 'b3': {'location': 'Cordoba', 'price': 10},
+                    'b4': {'location': 'Malaga', 'price': 10}, 'b5': {'location': 'Jaen', 'price': 10},
+                    'b5': {'location': 'Granada', 'price': 10}, 'b6': {'location': 'Almeria', 'price': 10}}
 
     state1.packages = {f'p{i+1}': {'location': loc}
                        for i, loc in enumerate(args.ppos)}
@@ -353,8 +353,6 @@ if __name__ == "__main__":
                         help="Packages' final destination",
                         nargs="+",
                         choices=TRUCK_VALID_POSITIONS)
-    parser.add_argument("--price", required=True,
-                        help="Bus tickets' price in €. It's the same in all cities.")
     parser.add_argument("--verbose",
                         help="""
                             Verbosity in the execution. if verbose = 0 (the default), pyhop returns the solution but prints nothing;
