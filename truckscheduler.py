@@ -188,7 +188,7 @@ def travel_by_bus(state, goal, truck, driver, bus):
 
 def travel_by_truck(state, goal, truck, driver):
     return [('get_on_truck_op', truck, driver), ('all_packages_gathered', goal, truck, driver),
-            ('finish_delivery', goal, truck, driver), ('travel_to_city', goal, truck, driver), ('get_off_truck_op', driver, truck, goal)]
+            ('finish_delivery', goal, truck, driver), ('travel_to_goal', goal, truck, driver), ('get_off_truck_op', driver, truck, goal)]
 
 
 def travel_m(state, goal, truck, driver):
@@ -197,8 +197,8 @@ def travel_m(state, goal, truck, driver):
     if truckCurrentLocation != truckGoalLocation:
         selectedCity = select_new_city(
             state, truckCurrentLocation, truckGoalLocation)
-        return [('travel_op', truck, driver, selectedCity), ('travel_to_city', goal, truck, driver)]
-    return False
+        return [('travel_op', truck, driver, selectedCity), ('travel_to_goal', goal, truck, driver)]
+    return []
 
 
 def travel_to_package_m(state, goal, truck, driver, package):
@@ -210,12 +210,6 @@ def travel_to_package_m(state, goal, truck, driver, package):
         return [('travel_op', truck, driver, selectedCity), ('travel_and_gather_package', state, truck, driver, package)]
     else:
         return [('gather_package_op', truck, package)]
-
-
-def already_there(state, goal, truck, driver):
-    if state.trucks[truck]['location'] == goal.trucks[truck]['location'] and state.drivers[driver]['location'] == 'in_truck':
-        return []
-    return False
 
 
 def all_gathered(state, goal, truck, driver):
@@ -271,7 +265,7 @@ def main(args):
     pyhop.declare_methods('travel_and_gather_package', travel_to_package_m)
     pyhop.declare_methods('finish_delivery', all_delivered)
     pyhop.declare_methods('travel_and_deliver_package', deliver_package_m)
-    pyhop.declare_methods('travel_to_city', travel_m, already_there)
+    pyhop.declare_methods('travel_to_goal', travel_m)
     pyhop.declare_methods('choose_truck_and_driver', driver_walks_to_truck, driver_takes_bus_to_truck)
 
     # Initial State
