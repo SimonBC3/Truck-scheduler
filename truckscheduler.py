@@ -240,7 +240,7 @@ def deliver_package_m(state, goal, truck, driver, package):
         return [('drop_package_op', goal, truck, package)]
 
 
-def choose_variables(state, goal):
+def choose_truck_and_driver(state, goal):
     answer = choose_by_connection(state)
     if answer != {}:
         # walkToTruck
@@ -268,7 +268,7 @@ def main(args):
     pyhop.declare_methods('finish_delivery', all_delivered)
     pyhop.declare_methods('deliver_package', deliver_package_m)
     pyhop.declare_methods('travel_to_city', travel_m, already_there)
-    pyhop.declare_methods('choose_variables', choose_variables)
+    pyhop.declare_methods('choose_truck_and_driver', choose_truck_and_driver)
 
     # Initial State
     state1 = pyhop.State('state1')
@@ -321,7 +321,7 @@ def main(args):
     goal1.trucks = {f't{i+1}': {'location': args.destination}
                     for i in range(0, len(args.dpos))}
 
-    pyhop.pyhop(state1, [('choose_variables', goal1)], verbose=args.verbose)
+    pyhop.pyhop(state1, [('choose_truck_and_driver', goal1)], verbose=args.verbose)
 
 
 def check_args(args):
