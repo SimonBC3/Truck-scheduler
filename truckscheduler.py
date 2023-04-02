@@ -120,14 +120,14 @@ def travel_m(state, goal, truck, driver):
     return False
 
 
-def walk_to_truck(state, truck, driver):
+def walk_to_truck(state, goal, truck, driver):
     driverCurrentLocation = state.drivers[driver]['location']
     truckCurrentLocation = state.trucks[truck]['location']
     if driverCurrentLocation != truckCurrentLocation:
         selectedCity = select_new_city_to_walk(
             state, driverCurrentLocation, truckCurrentLocation)
-        return [('walk_op', driver, selectedCity), ('travel_to_truck', truck, driver)]
-    return False
+        return [('walk_op', driver, selectedCity), ('travel_to_truck_on_foot', goal, truck, driver)]
+    return travel_by_truck(state, goal, truck, driver)
 
 
 def travel_to_package_m(state, goal, truck, driver, package):
@@ -147,7 +147,7 @@ def already_there(state, goal, truck, driver):
     return False
 
 
-def already_on_truck(state, truck, driver):
+def already_on_truck(state, goal, truck, driver):
     if state.drivers[driver]['location'] == state.trucks[truck]['location'] and state.drivers[driver]['location']:
         return []
     return False
@@ -180,7 +180,7 @@ def deliver_package_m(state, goal, truck, driver, package):
         return [('drop_package_op', goal, truck, package)]
 
 
-pyhop.declare_methods('travel_to_truck', walk_to_truck, already_on_truck)
+pyhop.declare_methods('travel_to_truck_on_foot', walk_to_truck, already_on_truck)
 pyhop.declare_methods('retrieve_packages', all_gathered)
 pyhop.declare_methods('travel_to_package', travel_to_package_m)
 pyhop.declare_methods('finish_delivery', all_delivered)
@@ -189,23 +189,21 @@ pyhop.declare_methods('travel_to_city', travel_m, already_there)
 
 
 def travel_by_truck(state, goal, truck, driver):
-    #GoToTruckDecision
-    return [('travel_to_truck', truck, driver), ('get_on_truck_op', truck, driver), ('retrieve_packages', goal, truck, driver),
+    return [('get_on_truck_op', truck, driver), ('retrieve_packages', goal, truck, driver),
             ('finish_delivery', goal, truck, driver), ('travel_to_city', goal, truck, driver), ('get_off_truck_op', driver, truck, goal)]
 
-
-def travel_by_truck_t0(state, goal):
-    return travel_by_truck(state, goal, 't0')
 
 
 def chooseVariables(state, goal):
     answer = chooseByConnection(state)
     if answer != {}:
-        return travel_by_truck(state, goal, answer['truck'], answer['driver'],)
+        #walkToTruck
+        return [('travel_to_truck_on_foot', goal, answer['truck'], answer['driver'])]
     
     answer = chooseByDistance(state)
     if answer != {}:
-        return travel_by_truck(state, goal, answer['truck'], answer['driver'])
+        #takeBusToTruck
+        return [('travel_to_truck_by_bus')]
     return False
 
 
@@ -237,9 +235,10 @@ state1.sideways = {'Huelva': {'JerezDeLaFrontera'}, 'Sevilla': {'JerezDeLaFronte
                    'Guadix': {'Granada', 'Jaen', 'Almeria'}}
 
 
-state1.buses = {'b0': {'location': 'Huelva', 'price': 3}, 'b1': {'location': 'Sevilla', 'price': 3},
-                'b2': {'location': 'Almeria'}, 'price': 3}
-
+state1.buses = {'b0': {'location': 'Huelva', 'price': 3}, 'b1': {'location': 'Cadiz', 'price': 3},
+                'b2': {'location': 'Sevilla', 'price': 3}, 'b3': {'location': 'Cordoba', 'price': 3},
+                'b4': {'location': 'Malaga', 'price': 3}, 'b5': {'location': 'Jaen', 'price': 3},
+                'b5': {'location': 'Granada', 'price': 3}, 'b6': {'location': 'Almeria', 'price': 3}}
 
 state1.packages = {'p1': {'location': 'Sevilla'}}
 
