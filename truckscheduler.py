@@ -158,10 +158,11 @@ def deliver_package_m(state, goal, truck, driver, package):
 
 pyhop.declare_methods('travel_to_truck', walk_to_truck, already_on_truck)
 pyhop.declare_methods('retrieve_packages', all_gathered)
-pyhop.declare_methods('finish_delivery', all_delivered)
-pyhop.declare_methods('travel_to_city', travel_m, already_there)
 pyhop.declare_methods('travel_to_package', travel_to_package_m)
+pyhop.declare_methods('finish_delivery', all_delivered)
 pyhop.declare_methods('deliver_package', deliver_package_m)
+pyhop.declare_methods('travel_to_city', travel_m, already_there)
+
 
 
 def travel_by_truck(state, goal, truck):
@@ -187,13 +188,14 @@ state1.coordinates = {'Huelva': {'X': 25, 'Y': 275}, 'Cadiz': {'X': 200, 'Y': 50
                       'Cordoba': {'X': 475, 'Y': 450}, 'Malaga': {'X': 550, 'Y': 100}, 'Jaen': {'X': 750, 'Y': 425},
                       'Granada': {'X': 800, 'Y': 250}, 'Almeria': {'X': 1000, 'Y': 150}, 'JerezDeLaFrontera': {'X': 225, 'Y': 300},
                       'Osuna': {'X': 300, 'Y': 300}, 'Alcaudete': {'X': 675, 'Y': 400}, 'Guadix': {'X': 900, 'Y': 350}}
+
 state1.roads = {'Huelva': {'Sevilla'}, 'Sevilla': {'Cadiz', 'Huelva', 'Cordoba', 'Malaga'},
                 'Cadiz': {'Sevilla', 'Malaga'}, 'Cordoba': {'Sevilla', 'Malaga', 'Jaen'},
                 'Malaga': {'Cadiz', 'Huelva', 'Cordoba', 'Sevilla', 'Granada', 'Almeria'},
                 'Jaen': {'Cordoba', 'Granada'}, 'Granada': {'Jaen', 'Malaga', 'Almeria'},
                 'Almeria': {'Granada', 'Malaga'}}
 
-state1.walkways = {'Huelva': {'JerezDeLaFrontera'}, 'Sevilla': {'JerezDeLaFrontera', 'Osuna'},
+state1.sideways = {'Huelva': {'JerezDeLaFrontera'}, 'Sevilla': {'JerezDeLaFrontera', 'Osuna'},
                    'Cadiz': {'JerezDeLaFrontera', 'Osuna'}, 'Cordoba': {'Alcaudete'},
                    'Malaga': {'Osuna', 'Alcaudete'},
                    'Jaen': {'Alcaudete', 'Guadix'}, 'Granada': {'Gaudix', 'Alcaudete'},
@@ -202,12 +204,10 @@ state1.walkways = {'Huelva': {'JerezDeLaFrontera'}, 'Sevilla': {'JerezDeLaFronte
                    'Alcaudete': {'Malaga', 'Osuna', 'Cordoba', 'Jaen', 'Granada'},
                    'Guadix': {'Granada', 'Jaen', 'Almeria'}}
 
-#state1.paths = {}
 
-# state1.buses = {'b0': {'location': 'Huelva', 'price': 3}, 'b1': {'location': 'Sevilla', 'price': 3},
-#                'b2': {'location': 'Almeria'}, 'price': 3}
+state1.buses = {'b0': {'location': 'Huelva', 'price': 3}, 'b1': {'location': 'Sevilla', 'price': 3},
+                'b2': {'location': 'Almeria'}, 'price': 3}
 
-# state1.location_car = 'Huelva'
 
 state1.packages = {'p1': {'location': 'Sevilla'}}
 
