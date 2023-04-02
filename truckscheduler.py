@@ -316,16 +316,16 @@ def main(args):
     goal1.packages = {f'p{i+1}': {'location': loc}
                       for i, loc in enumerate(args.delivery)}
 
-    goal1.drivers = {f'd{i+1}': {'location': loc}
-                     for i, loc in enumerate(args.destination)}
-    goal1.trucks = {f't{i+1}': {'location': loc}
-                    for i, loc in enumerate(args.destination)}
+    goal1.drivers = {f'd{i+1}': {'location': args.destination}
+                     for i in range(0, len(args.dpos))}
+    goal1.trucks = {f't{i+1}': {'location': args.destination}
+                    for i in range(0, len(args.dpos))}
 
     pyhop.pyhop(state1, [('choose_variables', goal1)], verbose=args.verbose)
 
 
 def check_args(args):
-    if (len(args.destination) == len(args.dpos) == len(args.tpos) and len(args.delivery) == len(args.ppos)):
+    if (len(args.delivery) == len(args.ppos)):
         return True
     else:
         raise Exception(f"Check that the number of specified arguments match.")
@@ -343,7 +343,6 @@ if __name__ == "__main__":
                         choices=TRUCK_VALID_POSITIONS)
     parser.add_argument("--destination", required=True,
                         help="Drivers' and trucks' final destinations. Trucks and drivers share the same destination.",
-                        nargs="+",
                         choices=TRUCK_VALID_POSITIONS)
     parser.add_argument("--ppos", required=True,
                         help="Packages' initial positions",
