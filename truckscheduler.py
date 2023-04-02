@@ -191,10 +191,10 @@ def all_gathered(state, goal, truck, driver):
 
 def all_delivered(state, goal, truck, driver):
     for package in state.packages:
+        print('----chechking packages-----------')
         if (state.packages[package]['location'] == 'in_truck'):
             return [('deliver_package', goal, truck, driver, package), ('finish_delivery', goal, truck, driver)]
-        else:
-            return []
+    return []
 
 
 def deliver_package_m(state, goal, truck, driver, package):
@@ -267,7 +267,7 @@ state1.buses = {'b0': {'location': 'Huelva', 'price': 3}, 'b1': {'location': 'Ca
                 'b4': {'location': 'Malaga', 'price': 3}, 'b5': {'location': 'Jaen', 'price': 3},
                 'b5': {'location': 'Granada', 'price': 3}, 'b6': {'location': 'Almeria', 'price': 3}}
 
-state1.packages = {'p1': {'location': 'Sevilla'}}
+state1.packages = {'p1': {'location': 'Sevilla'}, 'p2': {'location': 'Malaga'}, 'p3': {'location': 'Jaen'}}
 
 state1.drivers = {'d1': {'location': 'Sevilla'}, 'd2': {'location': 'Alcaudete'}}
 state1.trucks = {'t0': {'location': 'Almeria'}, 't1': {'location': 'Cordoba'}}
@@ -278,7 +278,7 @@ state1.cost = 0
 
 # GOAL
 goal1 = pyhop.Goal('goal1')
-goal1.packages = {'p1': {'location': 'Jaen'}}
+goal1.packages = {'p1': {'location': 'Jaen'}, 'p2': {'location': 'Cordoba'}, 'p3': {'location': 'Malaga'}}
 goal1.drivers = {'d1': {'location': 'Sevilla'}, 'd2': {'location': 'Sevilla'}}
 goal1.trucks = {'t0': {'location': 'Sevilla'}, 't1': {'location': 'Sevilla'}}
 
