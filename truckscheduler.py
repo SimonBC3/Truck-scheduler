@@ -187,7 +187,7 @@ def travel_by_bus(state, goal, truck, driver, bus):
 
 
 def travel_by_truck(state, goal, truck, driver):
-    return [('get_on_truck_op', truck, driver), ('all_gathered', goal, truck, driver),
+    return [('get_on_truck_op', truck, driver), ('all_packages_gathered', goal, truck, driver),
             ('finish_delivery', goal, truck, driver), ('travel_to_city', goal, truck, driver), ('get_off_truck_op', driver, truck, goal)]
 
 
@@ -222,7 +222,7 @@ def all_gathered(state, goal, truck, driver):
     for package in state.packages:
         currentPackageLocation = state.packages[package]['location']
         if (currentPackageLocation != 'in_truck' and (currentPackageLocation != goal.packages[package]['location'])):
-            return [('travel_to_package', goal, truck, driver, package), ('all_gathered', goal, truck, driver)]
+            return [('travel_to_package', goal, truck, driver, package), ('all_packages_gathered', goal, truck, driver)]
     return []
 
 
@@ -267,7 +267,7 @@ def main(args):
                           walk_to_truck, already_on_truck)
     pyhop.declare_methods('travel_to_truck_by_bus', travel_by_bus)
     pyhop.declare_methods('start_delivery', travel_by_truck)
-    pyhop.declare_methods('all_gathered', all_gathered)
+    pyhop.declare_methods('all_packages_gathered', all_gathered)
     pyhop.declare_methods('travel_to_package', travel_to_package_m)
     pyhop.declare_methods('finish_delivery', all_delivered)
     pyhop.declare_methods('deliver_package', deliver_package_m)
