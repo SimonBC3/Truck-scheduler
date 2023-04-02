@@ -360,9 +360,9 @@ if __name__ == "__main__":
                             - if verbose = 2, it also prints a message on each recursive call;
                             - if verbose = 3, it also prints info about what it's computing.")
                             """,
-                        choices=[1, 2, 3],
+                        choices=[0, 1, 2, 3],
                         type=int,
-                        default=1)
+                        default=0)
 
     args = parser.parse_args()
     if check_args(args):
